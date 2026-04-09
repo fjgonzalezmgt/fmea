@@ -48,19 +48,19 @@ st.markdown('<p class="sub-header">Análisis de Modos de Fallo y Efectos potenci
 # Sidebar - Configuración
 st.sidebar.header("⚙️ Configuración")
 
-# API Key
-api_key_env = os.getenv("OPENAI_API_KEY", "")
-if api_key_env:
-    api_key = api_key_env
-    st.sidebar.success("✅ API Key configurada desde archivo .env")
+# API Key - Solo desde archivo .env
+api_key = os.getenv("OPENAI_API_KEY", "")
+if api_key:
+    st.sidebar.success("✅ API Key configurada correctamente")
 else:
-    api_key = st.sidebar.text_input(
-        "🔑 OpenAI API Key",
-        type="password",
-        help="Ingresa tu API key de OpenAI. Puedes obtenerla en https://platform.openai.com/api-keys"
-    )
-    if not api_key:
-        st.sidebar.error("⚠️ API Key requerida para usar la aplicación")
+    st.sidebar.error("⚠️ API Key no configurada")
+    st.sidebar.warning("Configura tu API Key en el archivo `.env`")
+    st.sidebar.info("""
+    **Pasos para configurar:**
+    1. Copia `.env.example` a `.env`
+    2. Edita `.env` y agrega tu API key
+    3. Reinicia la aplicación
+    """)
 
 # Modelo fijo
 model = "gpt-5.4"

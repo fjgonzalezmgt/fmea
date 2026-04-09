@@ -9,18 +9,89 @@
 
 Aplicación web para generar análisis FMEA (Failure Mode and Effects Analysis) automáticamente a partir de los pasos de un proceso, utilizando la API de OpenAI.
 
+---
+
+## 📑 Tabla de Contenido
+
+- [🌟 Características Principales](#-características-principales)
+- [📋 Requisitos Previos](#-requisitos-previos)
+- [🚀 Instalación](#-instalación)
+- [▶️ Uso](#️-uso)
+- [📊 Formato de Excel de Entrada](#-formato-de-excel-de-entrada)
+- [📈 Interpretación de Resultados](#-interpretación-de-resultados)
+- [🎯 Características Avanzadas](#-características-avanzadas)
+- [💡 Consejos de Uso](#-consejos-de-uso)
+- [🛠️ Estructura del Proyecto](#️-estructura-del-proyecto)
+- [🐛 Solución de Problemas](#-solución-de-problemas)
+- [📚 Referencias](#-referencias)
+- [📄 Licencia](#-licencia)
+
+---
+
 [cc-by]: https://creativecommons.org/licenses/by/4.0/deed.es
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
 
-## 🌟 Características
+## 🌟 Características Principales
 
-- ✅ **Generación automática de FMEA** usando modelos avanzados de OpenAI (GPT-5.4, GPT-4o)
-- 📊 **Análisis completo** con Severidad, Ocurrencia, Detección y cálculo automático de RPN
-- 🎨 **Interfaz intuitiva** desarrollada con Streamlit
-- ✏️ **Editor interactivo** para ajustar y refinar los resultados
-- 📥 **Exportación a Excel** con formato profesional y colores condicionales
-- 🌐 **Soporte multiidioma** (Español e Inglés)
-- 🔧 **Altamente configurable** - número de modos de fallo, modelo de IA, etc.
+### 🚀 Generación Inteligente de FMEA
+- **IA de última generación**: Utiliza GPT-5.4 de OpenAI para análisis profundos y precisos
+- **Generación automática completa**: Crea modos de fallo, efectos, causas, controles y acciones recomendadas
+- **Múltiples escenarios por paso**: Configurable de 1 a 5 modos de fallo por cada paso del proceso
+- **Evaluación experta**: Asigna valores realistas de Severidad (S), Ocurrencia (O) y Detección (D) en escala 1-10
+- **Cálculo automático de RPN**: Risk Priority Number = S × O × D calculado automáticamente
+
+### 📊 Análisis y Visualización
+- **Dashboard de métricas**: Vista instantánea con total de items, RPN promedio, riesgos altos y RPN máximo
+- **Distribución de riesgos**: Categorización automática en riesgo bajo (<50), medio (50-100) y alto (>100)
+- **Top 5 riesgos**: Identificación inmediata de los mayores riesgos del proceso
+- **Vista tabular completa**: Visualización organizada de todos los campos del FMEA
+
+### ✏️ Edición Interactiva
+- **Editor en tiempo real**: Modifica cualquier valor directamente en la tabla
+- **Validación automática**: Asegura que S, O, D estén en rango 1-10
+- **Recálculo dinámico**: El RPN se actualiza automáticamente al cambiar S, O o D
+- **Agregar/eliminar filas**: Gestión flexible de items del FMEA
+- **Columnas editables y protegidas**: Algunas columnas bloqueadas para mantener integridad de datos
+
+### 📥 Importación y Validación
+- **Carga de Excel flexible**: Acepta diferentes formatos y nomenclaturas de columnas
+- **Validación inteligente**: Detecta automáticamente la columna de descripción del proceso
+- **Preview de datos**: Vista previa del archivo cargado antes de generar el análisis
+- **Detección de errores**: Mensajes claros sobre problemas en el formato del archivo
+- **Template incluido**: Archivo de ejemplo (`template_proceso.xlsx`) con estructura recomendada
+
+### 💾 Exportación Profesional
+- **Formato Excel completo**: Exporta con estilos profesionales y colores corporativos
+- **Formato condicional inteligente**: 
+  - 🟢 Verde para RPN < 50 (riesgo bajo)
+  - 🟡 Amarillo para RPN 50-100 (riesgo medio)
+  - 🔴 Rojo para RPN > 100 (riesgo alto)
+- **Filtros automáticos**: Todas las columnas con capacidad de filtrado
+- **Ajuste de columnas**: Ancho optimizado según contenido
+- **Encabezados formateados**: Títulos destacados y profesionales
+
+### 🌐 Configuración y Personalización
+- **Soporte multiidioma**: Interfaz y análisis en Español o Inglés
+- **Prompts externalizados y editables**: 
+  - Plantillas de prompts en archivos markdown separados
+  - Fácil personalización sin tocar código Python
+  - Agrega nuevos idiomas simplemente creando archivos
+  - Ajusta escalas y formato según necesidades corporativas
+- **Gestión segura de API Key**: 
+  - Carga exclusivamente desde archivo `.env`
+  - No permite ingreso manual (mayor seguridad)
+  - Nunca muestra la key en pantalla
+  - Archivo `.env` protegido en `.gitignore`
+- **Modos de fallo configurables**: Ajusta la cantidad según complejidad del proceso
+- **Barra de progreso**: Feedback visual durante la generación del análisis
+- **Sesión persistente**: Los datos generados se mantienen durante la sesión
+
+### 📚 Ayuda Integrada
+- **Documentación en la app**: Tab completo de ayuda con explicación de FMEA
+- **Escalas detalladas**: Guía completa de interpretación de S, O, D y RPN
+- **Ejemplo de Excel**: Formato recomendado con explicación de columnas
+- **Consejos de uso**: Mejores prácticas para obtener resultados óptimos
+- **Enlaces a recursos**: Referencias a estándares AIAG, ISO y documentación de OpenAI
 
 ## 📋 Requisitos Previos
 
@@ -51,20 +122,23 @@ Aplicación web para generar análisis FMEA (Failure Mode and Effects Analysis) 
    pip install -r requirements.txt
    ```
 
-4. **Configurar la API Key de OpenAI**
+4. **Configurar la API Key de OpenAI** (Obligatorio)
    
-   Opción 1: Crear archivo `.env` (recomendado para desarrollo)
+   Crea un archivo `.env` en el directorio del proyecto:
    ```bash
    copy .env.example .env
    ```
-   Edita el archivo `.env` y agrega tu API key:
+   
+   Edita el archivo `.env` y agrega tu API key de OpenAI:
    ```
-   OPENAI_API_KEY=tu-api-key-aqui
+   OPENAI_API_KEY=sk-tu-api-key-aqui
    ```
    
-   Opción 2: Ingresar la API key directamente en la aplicación (recomendado para uso ocasional)
+   > **Importante**: La aplicación solo funcionará si la API key está configurada en el archivo `.env`
 
 ## ▶️ Uso
+
+### 🎬 Inicio Rápido
 
 1. **Iniciar la aplicación**
    ```bash
@@ -77,22 +151,72 @@ Aplicación web para generar análisis FMEA (Failure Mode and Effects Analysis) 
    streamlit run app.py
    ```
 
-2. **En el navegador web**:
+2. **Acceder a la interfaz web**
    - La aplicación se abrirá automáticamente en `http://localhost:8501`
    - Si no se abre, accede manualmente a esa URL
 
-3. **Configuración inicial**:
-   - Ingresa tu API Key de OpenAI en la barra lateral (o configúrala en archivo `.env`)
-   - La aplicación usa el modelo **GPT-5.4** (modelo frontera de OpenAI)
-   - Configura el número de modos de fallo por paso (2-3 recomendado)
-   - Selecciona el idioma de salida (Español/English)
+### 📝 Flujo de Trabajo Completo
 
-4. **Generar FMEA**:
-   - Sube tu archivo Excel con los pasos del proceso
-   - Haz clic en "Generar Análisis FMEA"
-   - Espera mientras la IA analiza tu proceso
-   - Revisa y edita los resultados en el editor interactivo
-   - Descarga el análisis en Excel con formato profesional
+#### 1️⃣ **Configuración** (Barra Lateral)
+- ✅ **API Key**: Verifica que esté configurada correctamente (se carga desde `.env`)
+- 🌐 **Idioma**: Selecciona Español o English para el análisis
+- 📊 **Modos de fallo**: Ajusta cuántos escenarios generar por paso (1-5, recomendado: 2-3)
+
+#### 2️⃣ **Carga de Proceso** (Tab: 📤 Cargar Proceso)
+- Haz clic en "Browse files" o arrastra tu archivo Excel
+- Visualiza el preview de tus datos cargados
+- La app valida automáticamente el formato
+- Si todo está correcto, aparece el botón "🚀 Generar Análisis FMEA"
+
+#### 3️⃣ **Generación de FMEA**
+- Haz clic en "🚀 Generar Análisis FMEA"
+- Observa la barra de progreso mientras la IA trabaja:
+  - ⏳ Enviando solicitud a OpenAI...
+  - 🔄 Procesando respuesta...
+  - ✅ ¡FMEA generado exitosamente!
+- ¡Celebración con confetti! 🎉
+
+#### 4️⃣ **Análisis y Edición** (Tab: 🔍 Análisis FMEA)
+- **Revisa las métricas principales**:
+  - Total de items generados
+  - RPN promedio del proceso
+  - Cantidad de riesgos altos
+  - RPN máximo encontrado
+
+- **Explora los datos**:
+  - Tabla interactiva con todos los campos del FMEA
+  - Edita valores directamente en las celdas
+  - Agrega o elimina filas según necesites
+  - Observa el recálculo automático del RPN
+
+- **Analiza la distribución de riesgos**:
+  - Gráfica de cantidad por categoría (Bajo/Medio/Alto)
+  - Top 5 riesgos más críticos
+
+#### 5️⃣ **Exportación** (Tab: 🔍 Análisis FMEA)
+- Define el nombre de tu archivo de salida
+- Haz clic en "📥 Descargar Excel"
+- Obtén un archivo Excel profesional con:
+  - ✅ Formato condicional por colores según RPN
+  - ✅ Filtros automáticos en todas las columnas
+  - ✅ Encabezados formateados
+  - ✅ Columnas ajustadas al contenido
+
+#### 6️⃣ **Consulta la Ayuda** (Tab: 📊 Ayuda)
+- Definiciones completas de FMEA
+- Escalas de Severidad, Ocurrencia y Detección
+- Interpretación del RPN
+- Formato recomendado de Excel
+- Mejores prácticas y consejos
+
+### ⚡ Inicio Rápido con Script
+
+Para Windows, simplemente ejecuta:
+```bash
+run_app.bat
+```
+
+Este script automáticamente activa el ambiente conda y lanza la aplicación.
 
 ## 📊 Formato de Excel de Entrada
 
@@ -162,7 +286,7 @@ La aplicación utiliza **GPT-5.4**, el modelo frontera de OpenAI, que proporcion
 
 ### Configuraciones Personalizables
 
-- **API Key**: Ingrésala en la app o confígura archivo `.env` para desarrollo
+- **API Key**: Se configura únicamente desde archivo `.env` (mayor seguridad)
 - **Modos de fallo por paso**: Controla cuántos escenarios de fallo generar (1-5)
 - **Idioma**: Genera el análisis en Español o Inglés
 - **Edición en vivo**: Modifica cualquier valor y el RPN se recalcula automáticamente
@@ -180,17 +304,21 @@ El Excel exportado incluye:
 
 ## 🔒 Seguridad y Privacidad
 
-- ⚠️ **No compartir API Keys**: Nunca subas archivos `.env` a repositorios públicos
+- ⚠️ **Protección de API Keys**: 
+  - Nunca subas archivos `.env` a repositorios públicos
+  - El archivo `.env` está incluido en `.gitignore` por seguridad
+  - La API key solo se carga desde el archivo `.env` (no se permite ingreso manual)
 - 🔐 **Datos del proceso**: Los datos se envían a OpenAI para el análisis. Revisa los términos de servicio de OpenAI
 - 💾 **Datos locales**: La aplicación no almacena tus datos. Todo se procesa en memoria
 
 ## 💡 Consejos de Uso
 
-1. **API Key**: Puedes ingresarla en la app o crear archivo `.env` con `OPENAI_API_KEY=tu-key`
+1. **API Key**: Asegúrate de configurar el archivo `.env` con tu `OPENAI_API_KEY` antes de iniciar
 2. **Procesos simples**: Usa 2 modos de fallo por paso para análisis rápidos y enfocados
 3. **Procesos complejos**: Aumenta a 3-4 modos de fallo para análisis exhaustivos
 4. **Edición**: Siempre revisa y ajusta los valores según tu experiencia del proceso
 5. **Priorización**: Enfócate primero en items con RPN > 100
+6. **Reinicio**: Si cambias la API key en `.env`, reinicia la aplicación para que tome efecto
 
 ## 🛠️ Estructura del Proyecto
 
@@ -203,15 +331,37 @@ fmea/
 ├── .gitignore             # Archivos a ignorar en Git
 ├── LICENSE                # Licencia Creative Commons BY 4.0
 ├── README.md              # Este archivo
-└── template_proceso.xlsx  # Ejemplo de archivo de entrada
+├── template_proceso.xlsx  # Ejemplo de archivo de entrada
+├── run_app.bat            # Script de inicio para Windows
+└── prompts/               # Plantillas de prompts para la IA
+    ├── fmea_prompt_es.md  # Prompt en español (personalizable)
+    └── fmea_prompt_en.md  # Prompt en inglés (personalizable)
 ```
+
+### 📝 Personalización de Prompts
+
+Los prompts utilizados para generar el análisis FMEA están almacenados en archivos markdown en la carpeta `prompts/`. Esto te permite:
+
+- ✏️ **Personalizar las instrucciones** para la IA según tus necesidades específicas
+- 🌐 **Agregar nuevos idiomas** creando archivos `fmea_prompt_XX.md` (donde XX es el código del idioma)
+- 🎯 **Ajustar las escalas** de Severidad, Ocurrencia y Detección según estándares corporativos
+- 📋 **Modificar el formato de salida** para incluir campos adicionales
+- 🔄 **Versionar los prompts** independientemente del código Python
+
+Los prompts utilizan placeholders que se reemplazan automáticamente:
+- `{num_failures}`: Número de modos de fallo por paso
+- `{process_steps}`: Lista enumerada de los pasos del proceso
+
+> **Nota**: Después de modificar los prompts, simplemente recarga la página en Streamlit para que los cambios tomen efecto.
 
 ## 🐛 Solución de Problemas
 
-### Error: "Invalid API Key"
-- Verifica que tu API key sea correcta (empieza con `sk-`)
+### Error: "Invalid API Key" o "API Key no configurada"
+- Verifica que el archivo `.env` exista en el directorio del proyecto
+- Abre el archivo `.env` y confirma que la API key esté correctamente escrita (empieza con `sk-`)
 - Asegúrate de tener créditos disponibles en tu cuenta de OpenAI
-- Si usas archivo `.env`, verifica que esté en el directorio correcto
+- Reinicia la aplicación después de modificar el archivo `.env`
+- No incluyas espacios ni comillas extras: `OPENAI_API_KEY=sk-tu-key-aqui`
 
 ### Error: "No se encontró columna de descripción"
 - Verifica que tu Excel tenga una columna con la descripción de los pasos
