@@ -1,5 +1,36 @@
 """
-Módulo para generar FMEA (Failure Mode and Effects Analysis) usando OpenAI API
+Generador de FMEA usando OpenAI API.
+
+Este módulo proporciona la clase FMEAGenerator que permite generar análisis
+FMEA (Failure Mode and Effects Analysis) automáticamente utilizando modelos
+de lenguaje de OpenAI.
+
+Clases
+------
+FMEAGenerator
+    Generador principal de análisis FMEA con integración a OpenAI
+
+Notas
+-----
+El módulo utiliza plantillas de prompts externas almacenadas en archivos
+markdown en la carpeta 'prompts/' para mayor flexibilidad y mantenibilidad.
+
+Ejemplos
+--------
+>>> from fmea_generator import FMEAGenerator
+>>> import pandas as pd
+>>> 
+>>> # Crear generador
+>>> generator = FMEAGenerator(api_key="sk-...", language="es")
+>>> 
+>>> # Cargar datos del proceso
+>>> df = pd.read_excel("proceso.xlsx")
+>>> 
+>>> # Generar FMEA
+>>> fmea_df = generator.generate_fmea(df, num_failures=2)
+>>> 
+>>> # Exportar a Excel
+>>> generator.export_to_excel(fmea_df, "fmea_resultado.xlsx")
 """
 import pandas as pd
 import json
@@ -9,16 +40,38 @@ from openai import OpenAI
 
 
 class FMEAGenerator:
-    """Generador de análisis FMEA usando IA"""
+    """
+    Generador de análisis FMEA usando IA.
+    
+    Esta clase proporciona métodos para generar análisis FMEA (Failure Mode and Effects Analysis)
+    automáticamente utilizando modelos de lenguaje de OpenAI.
+    """
     
     def __init__(self, api_key: str, model: str = "gpt-5.4", language: str = "es"):
         """
-        Inicializar el generador FMEA
+        Inicializar el generador FMEA.
         
-        Args:
-            api_key: API key de OpenAI
-            model: Modelo a utilizar (gpt-5.4, gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo)
-            language: Idioma de salida ('es' o 'en')
+        Parameters
+        ----------
+        api_key : str
+            API key de OpenAI para autenticación
+        model : str, optional
+            Modelo de OpenAI a utilizar (default: "gpt-5.4")
+            Opciones: 'gpt-5.4', 'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'
+        language : str, optional
+            Idioma de salida del análisis (default: "es")
+            Opciones: 'es' (español), 'en' (inglés)
+        
+        Attributes
+        ----------
+        client : OpenAI
+            Cliente de OpenAI para realizar llamadas a la API
+        model : str
+            Modelo configurado para el análisis
+        language : str
+            Idioma configurado para el análisis
+        prompts_dir : str
+            Ruta al directorio que contiene las plantillas de prompts
         """
         self.client = OpenAI(api_key=api_key)
         self.model = model
@@ -27,13 +80,24 @@ class FMEAGenerator:
     
     def load_prompt_template(self, language: str) -> str:
         """
-        Cargar template de prompt desde archivo
+        Cargar plantilla de prompt desde archivo markdown.
         
-        Args:
-            language: Código de idioma ('es' o 'en')
+        Parameters
+        ----------
+        language : str
+            Código de idioma de la plantilla ('es' o 'en')
             
-        Returns:
-            Template de prompt como string
+        Returns
+        -------
+        str
+            Contenido de la plantilla de prompt
+            
+        Raises
+        ------
+        FileNotFoundError
+            Si no se encuentra el archivo de plantilla para el idioma especificado
+        Exception
+            Si ocurre un error al leer el archivo
         """
         prompt_file = os.path.join(self.prompts_dir, f'fmea_prompt_{language}.md')
         
@@ -47,13 +111,22 @@ class FMEAGenerator:
         
     def read_process_excel(self, file) -> pd.DataFrame:
         """
-        Leer archivo Excel con pasos del proceso
+        Leer archivo Excel con pasos del proceso.
         
-        Args:
-            file: Archivo Excel (BytesIO o ruta)
+        Parameters
+        ----------
+        file : str or BytesIO
+            Archivo Excel (ruta del archivo o objeto BytesIO)
             
-        Returns:
-            DataFrame con los pasos del proceso
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame con los pasos del proceso cargados desde el Excel
+            
+        Raises
+        ------
+        ValueError
+            Si hay un error al leer o procesar el archivo Excel
         """
         try:
             df = pd.read_excel(file)
@@ -63,13 +136,22 @@ class FMEAGenerator:
     
     def validate_process_data(self, df: pd.DataFrame) -> tuple[bool, str]:
         """
-        Validar que el DataFrame tenga las columnas necesarias
+        Validar que el DataFrame tenga las columnas necesarias.
         
-        Args:
-            df: DataFrame a validar
+        Verifica que el DataFrame contenga al menos una columna de descripción
+        del proceso con nombres comunes aceptados.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame a validar
             
-        Returns:
-            Tupla (es_valido, mensaje_error)
+        Returns
+        -------
+        tuple[bool, str]
+            Tupla (es_valido, mensaje_error) donde:
+            - es_valido: True si la validación es exitosa, False en caso contrario
+            - mensaje_error: Mensaje descriptivo del error (vacío si es válido)
         """
         # Columnas requeridas (al menos una de estas debe existir para descripción)
         required_cols = ['descripcion', 'descripción', 'description', 'nombre', 'nombre del paso', 'paso']
@@ -86,7 +168,27 @@ class FMEAGenerator:
         return True, ""
     
     def get_description_column(self, df: pd.DataFrame) -> str:
-        """Identificar la columna de descripción del proceso"""
+        """
+        Identificar la columna de descripción del proceso.
+        
+        Busca en el DataFrame una columna que contenga la descripción de los pasos
+        del proceso, probando nombres comunes en español e inglés.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame con los datos del proceso
+            
+        Returns
+        -------
+        str
+            Nombre de la columna identificada como descripción del proceso
+            
+        Notes
+        -----
+        Si no se encuentra una columna con nombre estándar, se utiliza la segunda
+        columna (asumiendo que la primera es el número) o la primera columna disponible.
+        """
         possible_names = ['descripcion', 'descripción', 'description', 'nombre', 'nombre del paso', 'paso', 'actividad']
         
         for col in df.columns:
@@ -99,7 +201,26 @@ class FMEAGenerator:
         return df.columns[0]
     
     def get_step_info(self, row: pd.Series, desc_col: str) -> str:
-        """Construir descripción completa del paso incluyendo toda la información disponible"""
+        """
+        Construir descripción completa del paso del proceso.
+        
+        Combina la descripción principal con información adicional disponible
+        (responsable, entradas, salidas, recursos, etc.) para proporcionar
+        contexto completo a la IA.
+        
+        Parameters
+        ----------
+        row : pd.Series
+            Fila del DataFrame que representa un paso del proceso
+        desc_col : str
+            Nombre de la columna que contiene la descripción principal
+            
+        Returns
+        -------
+        str
+            Descripción completa del paso formateada con toda la información disponible,
+            separada por pipe (|)
+        """
         info_parts = []
         
         # Descripción principal
@@ -127,14 +248,28 @@ class FMEAGenerator:
     
     def build_fmea_prompt(self, process_steps: List[str], num_failures: int = 2) -> str:
         """
-        Construir el prompt para generar FMEA
+        Construir el prompt para generar análisis FMEA.
         
-        Args:
-            process_steps: Lista de descripciones de pasos del proceso
-            num_failures: Número de modos de fallo a generar por paso
+        Carga la plantilla de prompt correspondiente al idioma configurado,
+        formatea la lista de pasos del proceso y reemplaza los placeholders.
+        
+        Parameters
+        ----------
+        process_steps : List[str]
+            Lista de descripciones de pasos del proceso a analizar
+        num_failures : int, optional
+            Número de modos de fallo a generar por cada paso (default: 2)
             
-        Returns:
-            Prompt para OpenAI
+        Returns
+        -------
+        str
+            Prompt completo formateado para enviar a la API de OpenAI
+            
+        Notes
+        -----
+        Utiliza placeholders en la plantilla:
+        - {num_failures}: Reemplazado por el número de modos de fallo
+        - {process_steps}: Reemplazado por la lista enumerada de pasos
         """
         # Cargar template desde archivo
         template = self.load_prompt_template(self.language)
@@ -150,15 +285,44 @@ class FMEAGenerator:
     
     def generate_fmea(self, df: pd.DataFrame, num_failures: int = 2, progress_callback=None) -> pd.DataFrame:
         """
-        Generar análisis FMEA completo
+        Generar análisis FMEA completo.
         
-        Args:
-            df: DataFrame con pasos del proceso
-            num_failures: Número de modos de fallo por paso
-            progress_callback: Función opcional para actualizar progreso
+        Procesa el DataFrame de pasos del proceso, construye el prompt,
+        llama a la API de OpenAI, parsea la respuesta y retorna el análisis
+        FMEA estructurado con cálculo de RPN.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame con los pasos del proceso a analizar
+        num_failures : int, optional
+            Número de modos de fallo a generar por paso (default: 2)
+        progress_callback : callable, optional
+            Función de callback para reportar progreso.
+            Firma: callback(progress: float, message: str)
+            donde progress es un valor entre 0 y 1
             
-        Returns:
-            DataFrame con el análisis FMEA
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame con el análisis FMEA completo incluyendo:
+            - numero_paso: Número del paso del proceso
+            - paso_proceso: Descripción del paso
+            - modo_fallo: Modo de fallo identificado
+            - efecto_fallo: Efecto del modo de fallo
+            - severidad: Calificación de severidad (1-10)
+            - causa_potencial: Causa potencial del fallo
+            - ocurrencia: Calificación de ocurrencia (1-10)
+            - controles_actuales: Controles actuales del proceso
+            - deteccion: Calificación de detección (1-10)
+            - RPN: Risk Priority Number (S × O × D)
+            - acciones_recomendadas: Acciones recomendadas
+            
+        Raises
+        ------
+        ValueError
+            Si los datos del proceso no son válidos, si hay error al parsear
+            la respuesta de OpenAI, o si ocurre un error durante la generación
         """
         # Validar datos
         is_valid, error_msg = self.validate_process_data(df)
@@ -227,11 +391,27 @@ class FMEAGenerator:
     
     def export_to_excel(self, fmea_df: pd.DataFrame, output_file: str):
         """
-        Exportar FMEA a Excel con formato
+        Exportar análisis FMEA a archivo Excel con formato profesional.
         
-        Args:
-            fmea_df: DataFrame con FMEA
-            output_file: Ruta del archivo de salida
+        Crea un archivo Excel con formato condicional basado en valores de RPN,
+        encabezados formateados, filtros automáticos y columnas ajustadas.
+        
+        Parameters
+        ----------
+        fmea_df : pd.DataFrame
+            DataFrame con el análisis FMEA a exportar
+        output_file : str
+            Ruta del archivo de salida Excel (.xlsx)
+            
+        Notes
+        -----
+        Aplicaciones de formato:
+        - Encabezados: Fondo azul oscuro con texto blanco en negrita
+        - RPN < 50: Fondo verde (riesgo bajo)
+        - 50 ≤ RPN ≤ 100: Fondo amarillo (riesgo medio)
+        - RPN > 100: Fondo rojo (riesgo alto)
+        - Filtros automáticos habilitados en todas las columnas
+        - Ancho de columnas ajustado al contenido (máximo 50 caracteres)
         """
         from openpyxl import load_workbook
         from openpyxl.styles import Font, PatternFill, Alignment

@@ -1,5 +1,37 @@
 """
-Aplicación Streamlit para Generación Automática de FMEA con OpenAI
+Aplicación web para generación automática de FMEA usando IA.
+
+Esta aplicación web construida con Streamlit permite a los usuarios cargar
+procesos en formato Excel y generar análisis FMEA (Failure Mode and Effects
+Analysis) automáticamente utilizando la API de OpenAI.
+
+Funcionalidades principales
+---------------------------
+- Carga de archivos Excel con pasos de procesos
+- Validación automática de formato de datos
+- Generación de análisis FMEA con GPT-5.4
+- Editor interactivo de resultados
+- Visualización de métricas y distribución de riesgos
+- Exportación a Excel con formato profesional
+- Soporte multiidioma (Español/Inglés)
+
+Configuración
+-------------
+Requiere archivo .env con:
+    OPENAI_API_KEY=sk-your-api-key-here
+
+Uso
+---
+Ejecutar con:
+    streamlit run app.py
+
+O con ambiente conda:
+    conda run -n fmea streamlit run app.py
+
+Notas
+-----
+La aplicación utiliza plantillas de prompts configurables almacenadas
+en archivos markdown para mayor flexibilidad en la generación de análisis.
 """
 import streamlit as st
 import pandas as pd
@@ -154,6 +186,19 @@ with tab1:
                                 status_text = st.empty()
                                 
                                 def update_progress(value, message):
+                                    """
+                                    Actualizar barra de progreso y mensaje de estado.
+                                    
+                                    Función de callback para reportar el progreso de la generación
+                                    de FMEA a la interfaz de usuario.
+                                    
+                                    Parameters
+                                    ----------
+                                    value : float
+                                        Valor de progreso entre 0.0 y 1.0
+                                    message : str
+                                        Mensaje de estado a mostrar al usuario
+                                    """
                                     progress_bar.progress(value)
                                     status_text.text(message)
                                 
