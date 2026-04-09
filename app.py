@@ -377,6 +377,15 @@ with tab2:
 with tab3:
     st.header("📊 Ayuda y Guía de Uso")
     
+    # Advertencia importante
+    st.warning("""
+    ⚠️ **IMPORTANTE**: Esta herramienta genera un análisis FMEA automatizado que debe considerarse como 
+    **insumo inicial** para el análisis formal. El análisis FMEA definitivo y las decisiones relacionadas 
+    con la gestión de riesgos son responsabilidad del **responsable del proceso y su equipo de trabajo**.
+    
+    Revisa, valida y complementa los resultados con la experiencia del equipo y datos históricos del proceso.
+    """)
+    
     st.markdown("""
     ### ¿Qué es FMEA?
     
@@ -426,11 +435,12 @@ with tab3:
     
     ### Consejos de Uso
     
-    1. **API Key**: Obtén tu clave en [OpenAI Platform](https://platform.openai.com/api-keys)
-    2. **Modelo**: La aplicación usa GPT-5.4, el modelo frontera de OpenAI
-    3. **Modos de fallo**: Empieza con 2-3 por paso para obtener resultados enfocados
-    4. **Edición**: Revisa y ajusta los valores generados según tu conocimiento del proceso
-    5. **Acciones**: Prioriza acciones para items con RPN > 100
+    1. **⚠️ Herramienta de apoyo**: Esta aplicación genera un **borrador inicial** de FMEA. El análisis final debe ser validado y completado por el responsable del proceso y su equipo de trabajo
+    2. **API Key**: Obtén tu clave en [OpenAI Platform](https://platform.openai.com/api-keys)
+    3. **Modelo**: La aplicación usa GPT-5.4, el modelo frontera de OpenAI
+    4. **Modos de fallo**: Empieza con 2-3 por paso para obtener resultados enfocados
+    5. **Edición**: Revisa y ajusta los valores generados según tu conocimiento del proceso
+    6. **Acciones**: Prioriza acciones para items con RPN > 100
     
     ### Soporte
     

@@ -9,6 +9,16 @@
 
 Aplicación web para generar análisis FMEA (Failure Mode and Effects Analysis) automáticamente a partir de los pasos de un proceso, utilizando la API de OpenAI.
 
+> **⚠️ IMPORTANTE - Consideraciones de Uso**
+> 
+> Esta herramienta genera análisis FMEA automatizados que deben considerarse como **insumo inicial** para el análisis formal. El análisis FMEA definitivo y las decisiones relacionadas con la gestión de riesgos son responsabilidad del **responsable del proceso y su equipo de trabajo**. 
+> 
+> Se recomienda:
+> - Revisar y validar todos los modos de fallo generados
+> - Ajustar las calificaciones de Severidad, Ocurrencia y Detección según el conocimiento experto del proceso
+> - Complementar con la experiencia del equipo y datos históricos
+> - Utilizar como punto de partida para discusiones de mejora continua
+
 ---
 
 ## 📑 Tabla de Contenido
@@ -313,12 +323,13 @@ El Excel exportado incluye:
 
 ## 💡 Consejos de Uso
 
-1. **API Key**: Asegúrate de configurar el archivo `.env` con tu `OPENAI_API_KEY` antes de iniciar
-2. **Procesos simples**: Usa 2 modos de fallo por paso para análisis rápidos y enfocados
-3. **Procesos complejos**: Aumenta a 3-4 modos de fallo para análisis exhaustivos
-4. **Edición**: Siempre revisa y ajusta los valores según tu experiencia del proceso
-5. **Priorización**: Enfócate primero en items con RPN > 100
-6. **Reinicio**: Si cambias la API key en `.env`, reinicia la aplicación para que tome efecto
+1. **⚠️ Herramienta de apoyo**: Esta aplicación genera un **borrador inicial** de FMEA. El análisis final debe ser validado y completado por el responsable del proceso y su equipo de trabajo, quienes conocen mejor los detalles operativos
+2. **API Key**: Asegúrate de configurar el archivo `.env` con tu `OPENAI_API_KEY` antes de iniciar
+3. **Procesos simples**: Usa 2 modos de fallo por paso para análisis rápidos y enfocados
+4. **Procesos complejos**: Aumenta a 3-4 modos de fallo para análisis exhaustivos
+5. **Edición**: Siempre revisa y ajusta los valores según tu experiencia del proceso
+6. **Priorización**: Enfócate primero en items con RPN > 100
+7. **Reinicio**: Si cambias la API key en `.env`, reinicia la aplicación para que tome efecto
 
 ## 🛠️ Estructura del Proyecto
 
